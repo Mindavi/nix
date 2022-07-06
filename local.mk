@@ -1,6 +1,7 @@
 clean-files += Makefile.config
 
-GLOBAL_CXXFLAGS += -Wno-deprecated-declarations
+GLOBAL_CXXFLAGS += -Wno-deprecated-declarations -fsanitize=address,undefined
+GLOBAL_LDFLAGS += -fsanitize=address,undefined
 
 $(foreach i, config.h $(wildcard src/lib*/*.hh), \
   $(eval $(call install-file-in, $(i), $(includedir)/nix, 0644)))
