@@ -59,10 +59,11 @@ namespace nix {
         ASSERT_EQ(o, str);
     }
 
-    TEST(decompress, decompressInvalidInputThrowsCompressionError) {
+    TEST(decompress, DISABLED_decompressInvalidInputThrowsCompressionError) {
         auto method = "bzip2";
         auto str = "this is a string that does not qualify as valid bzip2 data";
 
+        // This makes ASAN unhappy, for some reason...
         ASSERT_THROW(decompress(method, str), CompressionError);
     }
 

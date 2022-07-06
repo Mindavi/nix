@@ -49,7 +49,10 @@ struct ArchiveDecompressionSource : Source
             this->archive->check(archive_read_next_header(this->archive->archive, &ae),
                 "failed to read header (%s)");
             if (archive_filter_count(this->archive->archive) < 2) {
+              {
+                warn("throwing exception CompressionError");
                 throw CompressionError("input compression not recognized");
+              }
             }
         }
         ssize_t result = archive_read_data(this->archive->archive, data, len);
