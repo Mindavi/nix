@@ -83,7 +83,7 @@
 
         configureFlags =
           lib.optionals stdenv.isLinux [
-            "--with-boost=${boost'}/lib"
+            "--with-boost=${boost}/lib"
             "--with-sandbox-shell=${sh}/bin/busybox"
             "LDFLAGS=-fuse-ld=gold"
           ];
@@ -110,7 +110,7 @@
             bzip2 xz brotli editline
             openssl sqlite
             libarchive
-            boost'
+            boost
             lowdown-nix
             gtest
           ]
@@ -281,14 +281,6 @@
           # Forward from the previous stage as we don’t want it to pick the lowdown override
           nixUnstable = prev.nixUnstable;
 
-          boost' = (prev.boost
-            .override { extraB2Args = [ "context-impl=ucontext" ]; })
-            .overrideAttrs(oldAttrs: {
-              NIX_CFLAGS_LINK = [ oldAttrs.NIX_CFLAGS_LINK ] ++ [ "-fsanitize=address,undefined" ];
-              NIX_CXXFLAGS_COMPILE = [ oldAttrs.NIX_CXXFLAGS_COMPILE or "" ] ++ [ "-fsanitize=address,undefined" ];
-            }
-          );
-
           nix = with final; with commonDeps pkgs; currentStdenv.mkDerivation {
             name = "nix-${version}";
             inherit version;
@@ -304,14 +296,14 @@
 
             propagatedBuildInputs = propagatedDeps;
 
-            disallowedReferences = [ boost' ];
+            disallowedReferences = [ boost ];
 
             preConfigure =
               ''
                 # Copy libboost_context so we don't get all of Boost in our closure.
                 # https://github.com/NixOS/nixpkgs/issues/45462
                 mkdir -p $out/lib
-                cp -pd ${boost'}/lib/{libboost_context*,libboost_thread*,libboost_system*} $out/lib
+                cp -pd ${boost}/lib/{libboost_context*,libboost_thread*,libboost_system*} $out/lib
                 rm -f $out/lib/*.a
                 ${lib.optionalString currentStdenv.isLinux ''
                   chmod u+w $out/lib/*.so.*
@@ -321,9 +313,9 @@
                   for LIB in $out/lib/*.dylib; do
                     chmod u+w $LIB
                     install_name_tool -id $LIB $LIB
-                    install_name_tool -delete_rpath ${boost'}/lib/ $LIB || true
+                    install_name_tool -delete_rpath ${boost}/lib/ $LIB || true
                   done
-                  install_name_tool -change ${boost'}/lib/libboost_system.dylib $out/lib/libboost_system.dylib $out/lib/libboost_thread.dylib
+                  install_name_tool -change ${boost}/lib/libboost_system.dylib $out/lib/libboost_system.dylib $out/lib/libboost_thread.dylib
                 ''}
               '';
 
@@ -343,7 +335,7 @@
               echo "doc manual $doc/share/doc/nix/manual" >> $doc/nix-support/hydra-build-products
               ${lib.optionalString currentStdenv.isDarwin ''
               install_name_tool \
-                -change ${boost'}/lib/libboost_context.dylib \
+                -change ${boost}/lib/libboost_context.dylib \
                 $out/lib/libboost_context.dylib \
                 $out/lib/libnixutil.dylib
               ''}
@@ -373,7 +365,7 @@
                   bzip2
                   xz
                   pkgs.perl
-                  boost'
+                  boost
                 ]
                 ++ lib.optional (currentStdenv.isLinux || currentStdenv.isDarwin) libsodium
                 ++ lib.optional currentStdenv.isDarwin darwin.apple_sdk.frameworks.Security;
