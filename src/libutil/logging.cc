@@ -6,6 +6,11 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 
+// makeSimpleLogger and makeJSONLogger leak memory
+extern "C" const char *__asan_default_options() {
+  return "detect_leaks=0";
+}
+
 namespace nix {
 
 LoggerSettings loggerSettings;

@@ -9,6 +9,10 @@
 
 extern char * * environ __attribute__((weak));
 
+extern "C" const char* __asan_default_options() {
+  return "detect_leaks=0";
+}
+
 namespace nix {
 
 RegisterCommand::Commands * RegisterCommand::commands = nullptr;
