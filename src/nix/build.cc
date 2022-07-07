@@ -8,6 +8,10 @@
 
 #include <nlohmann/json.hpp>
 
+extern "C" const char* __asan_default_options() {
+  return "detect_leaks=0";
+}
+
 using namespace nix;
 
 struct CmdBuild : InstallablesCommand, MixDryRun, MixJSON, MixProfile
